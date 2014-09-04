@@ -9,7 +9,9 @@ It is as simple as it can get. cws2fws FILENAME.swf reads the first 8 bytes of F
 
 DISCLAIMER: I offer no guarantee as to the usability of this program, it is provided "as is" for your personal use. Licensed under the MIT license, see deed below.
 
-author: Jose Fonseca (jfonseca [a@t] zefonseca.com)
+Author: Jose Fonseca (jfonseca [a@t] zefonseca.com)
+http://programacaobr.com/
+
 
 Copyleft (L) 2012 Jose Fonseca (jfonseca@zefonseca.com)
 
