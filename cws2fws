@@ -1,0 +1,91 @@
+#!/usr/bin/perl -w
+
+=begin
+
+    cws2fws v 0.0.1- Flash format 6+ decompressor
+    Jose Fonseca
+    http://programacaobr.com/
+    2008-04-26
+    
+    Usage: cws2fws <COMPRESSED_SWF_FILE.swf>
+    
+    Will output a FWS uncompressed Flash file in same format and version
+    to "COMPRESSED_SWF_FILE.fws.swf"
+    
+    This is free software which you can use, modify and redistribute with the same terms as Perl itself.
+    
+    Observing the SWF file format:
+    - the first 3 bytes are a signature indicating file type
+    - compressed files which SWF::Search currently cannot open always are CWS
+    - files it opens fine are always FWS (SWF backwards?)
+    - the next byte seems to match the version from output of the `file example.swf` command
+    - according to http://the-labs.com/MacromediaFlash/SWF-Spec/SWFfileformat.html the next
+      4 bytes indicate the total file length. it is a little endian 32 bit integer.
+      the url above mentions the file format is always "FWS", which is no longer true for
+      versions 6 and above of the SWF file format.
+    
+    So how do we decompress the file? Seems to be simpler than I imagined.
+    
+    1) read the 3 first bytes, compare to CWS, if not equal then exit
+    2) read the rest of the header. unless you need version or file length just leave version . length concatenated. we won't need them.
+    3) decompress everything from byte 9 to EOF
+    4) concatenate "FWS", the 5 header bytes and the decompressed stream
+    Voila, you have a valid decompressed FWS file you can open in flash player and verify!
+    
+    Motivation- SWF::Search will now open it so you can fool around with the strings!
+    
+=cut
+
+use Compress::Zlib qw{uncompress};
+
+my $zlib_data;
+my $header;
+my $type_sig;
+my $unc;
+my $file_prefix;
+
+usage() unless(defined($ARGV[0]));
+
+if ( $ARGV[0] !~ m{^(.+?)\.swf}i) {
+    usage();
+}
+
+$file_prefix = $1;
+
+open(FIL, $ARGV[0]);
+read(FIL, $type_sig, 3, 0);
+
+# is case sensitive, bytes must match ASCII 0x43 0x57 0x43 ("CWS" )
+if ($type_sig eq 'FWS') {
+    print STDERR "File is not compressed or header is invalid.\n";
+    # not compressed
+    exit();
+}
+
+# reads last bytes of header
+read(FIL, $header, 5, 0);
+
+# filehandle pointer now at 8
+# the rest is zlib compressed data
+while (<FIL>) {
+    $zlib_data .= $_;
+}
+close(FIL);
+
+=begin
+i observed that the CWS file length(bytes 5 to 8, little endian 32 bit integer) does not match that of the compressed
+data. by decompressing and checking again i see that the length header field
+refers to the zlib uncompressed stream + 8 bytes (header length). therefore
+to finish our decompression all we have to do is substitute the first 3
+byte signature for FWS and concatenate the rest of the header. works a dandy.
+- JMAF
+=cut
+$unc = uncompress($zlib_data);
+open(ZIL, ">" . $file_prefix . ".fws.swf");
+print ZIL "FWS" . $header . $unc;
+close(ZIL);
+
+sub usage {
+    print STDERR "Usage: cws2fws COMPRESSED_SWF_FILE\n";
+    exit();
+}
