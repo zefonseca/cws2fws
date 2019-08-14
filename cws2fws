@@ -2,13 +2,16 @@
 
 =begin
 
+
     cws2fws v 0.0.1- Flash format v. 6+ decompressor
     Author: Jose Fonseca (https://zefonseca.com/)
     First release: 2008-04-26
     Last updated:  2019-08-14
-    
+
+
     Usage: cws2fws <COMPRESSED_SWF_FILE.swf>
-    
+
+
     Will output a FWS uncompressed Flash file in same format and version to "COMPRESSED_SWF_FILE.fws.swf"
     
     This is free software which you can use, modify and redistribute with the same terms as Perl itself.
@@ -74,15 +77,20 @@ while (<FIL>) {
 close(FIL);
 
 =begin
-i observed that the CWS file length(bytes 5 to 8, little endian 32 bit integer) does not match that of the compressed
-data. by decompressing and checking again i see that the length header field
-refers to the zlib uncompressed stream + 8 bytes (header length). therefore
-to finish our decompression all we have to do is substitute the first 3
-byte signature for FWS and concatenate the rest of the header. works a dandy.
-- JMAF
+It seems like the CWS file length(bytes 5 to 8, little endian 32 bit integer) does not match that of the compressed data.
+
+By decompressing and checking again I found that the length header field refers to the zlib uncompressed stream + 8 bytes (header length).
+
+Therefore to finish our decompression all we have to do is substitute the first 3 byte signature for the string "FWS" and then concatenate the rest of the header.
+
 =cut
+
 $unc = uncompress($zlib_data);
-open(ZIL, ">" . $file_prefix . ".fws.swf");
+
+my $outfile_name = $file_prefix . ".fws.swf";
+
+open(ZIL, ">" . $outfile_name) or die "Error opening output file $outfile_name for writing.";
+binmode ZIL;
 print ZIL "FWS" . $header . $unc;
 close(ZIL);
 
