@@ -2,15 +2,14 @@
 
 =begin
 
-    cws2fws v 0.0.1- Flash format 6+ decompressor
-    Jose Fonseca
-    http://programacaobr.com/
-    2008-04-26
+    cws2fws v 0.0.1- Flash format v. 6+ decompressor
+    Author: Jose Fonseca (https://zefonseca.com/)
+    First release: 2008-04-26
+    Last updated:  2019-08-14
     
     Usage: cws2fws <COMPRESSED_SWF_FILE.swf>
     
-    Will output a FWS uncompressed Flash file in same format and version
-    to "COMPRESSED_SWF_FILE.fws.swf"
+    Will output a FWS uncompressed Flash file in same format and version to "COMPRESSED_SWF_FILE.fws.swf"
     
     This is free software which you can use, modify and redistribute with the same terms as Perl itself.
     
@@ -33,6 +32,8 @@
     Voila, you have a valid decompressed FWS file you can open in flash player and verify!
     
     Motivation- SWF::Search will now open it so you can fool around with the strings!
+
+    This software is released under the MIT license. See the accompanying COPYING or LICENSE file.
     
 =cut
 
